@@ -12,6 +12,7 @@ type TesterConfig struct {
 	JwtHeader string `json:"jwtHeader"`
 	JwtHeaderValue string `json:"jwtHeaderValue"`
 	JsonBodyPath string `json:"jsonBodyPath"`
+	byteArrayBody []byte
 
 }
 
@@ -25,5 +26,14 @@ func LoadConfig(path string) (*TesterConfig, error) {
 	if err != nil {
 		return nil, err
 	}
+	config.byteArrayBody, err = ioutil.ReadFile(config.JsonBodyPath)
+	if err != nil {
+		panic("Error al cargar el json, verifique que JsonBodyPath sea una ubicación existente")
+	}
+
 	return config, nil
+}
+
+func (config *TesterConfig) getBodyAsByteArray() []byte {
+	return config.byteArrayBody
 }

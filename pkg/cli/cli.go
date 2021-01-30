@@ -35,8 +35,7 @@ func (cli *testerCli) InitCli() {
 	fmt.Println("----------------------")
 	fmt.Println("")
 	fmt.Println("")
-	fmt.Println("1- RUN")
-	fmt.Println("2- Cambiar configuración")
+	fmt.Println("1- Correr prueba")
 	fmt.Println("0- Salir")
 	fmt.Println("")
 
@@ -54,12 +53,15 @@ func (cli *testerCli) InitCli() {
 
 func (cli *testerCli) Run() {
 	clear()
-	cantidadIntentosString := scan("Indique la cantidad de intentos (default 1)")
-
+	cantidadIntentosString := scan("Indique la cantidad de intentos (default 1) ")
 	cantidadIntentos, err := strconv.Atoi(cantidadIntentosString)
 	if err != nil {
 		cantidadIntentos = cantidad_intendos_default
 	}
+	clear()
+	fmt.Println("Se va a hacer un", cli.testerConfig.Method, "al endpoint", cli.testerConfig.Url, "con la cantidadIntentos:", cantidadIntentos)
+	scan("Presione cualquier tecla para continuar")
+	clear()
 
 	tester.Post(cli.testerConfig, cantidadIntentos)
 	scan("Presione cualquier tecla para continuar")
@@ -86,3 +88,4 @@ func scan(text string) string {
 	fmt.Scanln(&input)
 	return input
 }
+

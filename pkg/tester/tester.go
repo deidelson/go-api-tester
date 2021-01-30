@@ -3,29 +3,29 @@ package tester
 import (
 	"bytes"
 	"fmt"
-	"io/ioutil"
 	"net/http"
 	"sync"
+	"time"
 )
 
+
+//TODO armar objeto para ver estadisticas
 func Post(config *TesterConfig, cantidadDeRequest int) {
 	var wg sync.WaitGroup
 	wg.Add(cantidadDeRequest)
 
+	start := time.Now()
 	for i:=0; i < cantidadDeRequest; i++ {
 		go sendPedido(config, i, &wg)
 	}
 	wg.Wait()
+	duracion := time.Since(start)
+	fmt.Printf("El proceso domoró %s", duracion)
 }
 
 func sendPedido(config *TesterConfig, numeroIteracion int,  wg *sync.WaitGroup) {
 	fmt.Println("Ejecutando request numero: ", numeroIteracion)
-	requestBody, err := ioutil.ReadFile(config.JsonBodyPath)
-
-	if err != nil {
-		panic("Error critico")
-	}
-	request, err := http.NewRequest(config.Method, config.Url,  bytes.NewBuffer(requestBody))
+	request, err := http.NewRequest(config.Method, config.Url,  bytes.NewBuffer(config.getBodyAsByteArray()))
 	if err != nil {
 		fmt.Println("Error al crear la request ", err.Error())
 		panic("Error al crear la request")
@@ -41,10 +41,8 @@ func sendPedido(config *TesterConfig, numeroIteracion int,  wg *sync.WaitGroup) 
 
 	if err != nil {
 		fmt.Println("Error en la request ", err.Error())
-		panic(err.Error())
+		return
 	}
-
-	defer response.Body.Close()
 
 	fmt.Println("Request numero", numeroIteracion , "Status", response.StatusCode)
 
