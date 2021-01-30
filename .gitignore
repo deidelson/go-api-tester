@@ -28,5 +28,5 @@ golang-api
 
 #files
 body.json
-tester.json
+#tester.json
 main

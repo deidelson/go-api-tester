@@ -1,0 +1,7 @@
+{
+  "method": "POST",
+  "url": "http://localhost:8080/api/myEndpoint",
+  "jwtHeader": "authorization",
+  "jwtHeaderValue": "myToken",
+  "jsonBodyPath": "./body.json"
+}
