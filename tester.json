@@ -1,7 +1,0 @@
-{
-  "method": "POST",
-  "url": "http://localhost:8080/api/pedido",
-  "jwtHeader": "x-Authorization",
-  "jwtHeaderValue": "eyJhbGciOiJIUzUxMiJ9.eyJzdWIiOiJxcGx1c19hZG1pbiIsInVzZXJJZCI6MzMwNTMsImZpcnN0TmFtZSI6IkFkbWluaXN0cmFkb3IiLCJsYXN0TmFtZSI6IlF1aWxtZXMgcGx1cyIsImVtcGxveWVlSWQiOm51bGwsImNvdW50cnkiOiJBUiIsInJvbElkIjo2LCJyb2xSZWxldmFJZCI6OTksInRpbWV6b25lIjowLCJwZXJtaXNvc0xkYXAiOltdLCJpc3MiOiJzZWNyZXQtbG9jYWwiLCJqdGkiOiIzNWY3Y2FmOS1hYjUzLTQwZTEtODg3Yy0xNTQ4ZDE3YjQ1NDQiLCJpYXQiOjE2MTE4NTc2NTIsImV4cCI6MTYxMjExNjg1Mn0.SQ9Svm5CEpIQsR5cgknOKR8JB3DGonVbdcO1dMNGrdiuqF2rHd5s4OflWC4zq_N-izMW1U-FTzJc093fObnmlQ",
-  "jsonBodyPath": "./pedido.json"
-}
