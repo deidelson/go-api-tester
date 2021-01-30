@@ -21,6 +21,7 @@ func Post(config *TesterConfig, cantidadDeRequest int) {
 	wg.Wait()
 	duracion := time.Since(start)
 	fmt.Printf("El proceso domoró %s", duracion)
+	fmt.Println()
 }
 
 func sendPedido(config *TesterConfig, numeroIteracion int,  wg *sync.WaitGroup) {
