@@ -5,7 +5,10 @@ import (
 	"github.com/deidelson/go-api-tester/pkg/tester"
 	"os"
 	"os/exec"
+	"strconv"
 )
+
+const cantidad_intendos_default = 1;
 
 type TesterCli interface {
 	InitCli()
@@ -51,7 +54,14 @@ func (cli *testerCli) InitCli() {
 
 func (cli *testerCli) Run() {
 	clear()
-	tester.Post(cli.testerConfig, 10)
+	cantidadIntentosString := scan("Indique la cantidad de intentos (default 1)")
+
+	cantidadIntentos, err := strconv.Atoi(cantidadIntentosString)
+	if err != nil {
+		cantidadIntentos = cantidad_intendos_default
+	}
+
+	tester.Post(cli.testerConfig, cantidadIntentos)
 	scan("Presione cualquier tecla para continuar")
 	cli.InitCli()
 }
