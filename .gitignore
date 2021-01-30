@@ -27,5 +27,5 @@ golang-api
 
 
 #files
-pedido.json
+body.json
 tester.json
