@@ -46,8 +46,9 @@ func (stadistic *testerStadistic) addResult(result string) {
 	}
 }
 
-func (stadistic *testerStadistic) printStatidistics() {
-	fmt.Println("Test stadisctics")
+func (stadistic *testerStadistic) printStatistics() {
+	fmt.Println("")
+	fmt.Println("Test Statistics")
 	fmt.Println("----------------")
 	fmt.Println("")
 	fmt.Println("Duration: ", stadistic.testDuration)
@@ -57,7 +58,7 @@ func (stadistic *testerStadistic) printStatidistics() {
 	for result, duration := range stadistic.results {
 		fmt.Println("Count of", result + ":", duration)
 	}
-
+	fmt.Println("")
 }
 
 

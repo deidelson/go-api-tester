@@ -34,7 +34,7 @@ func (sender *requestSender) Send(config *TesterConfig, concurrency int) {
 	wg.Wait()
 
 	sender.stadistics.stopCounting()
-	sender.stadistics.printStatidistics()
+	sender.stadistics.printStatistics()
 
 	continuar := scan("Para correr la prueba de nuevo presione 1 (cualquier otra tecla envia al inicio): ")
 	if continuar == "1" {
