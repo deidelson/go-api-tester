@@ -18,12 +18,13 @@ type TesterCli interface {
 
 type testerCli struct {
 	testerConfig *tester.TesterConfig
+	tester tester.RequestSender
 }
 
 func NewTesterCli(path string) TesterCli {
 	cliInstance := &testerCli{
+		tester: tester.NewRequestSender(),
 	}
-
 	cliInstance.SelectConfig(path)
 
 	return cliInstance
@@ -63,8 +64,7 @@ func (cli *testerCli) Run() {
 	scan("Presione cualquier tecla para continuar")
 	clear()
 
-	tester.Post(cli.testerConfig, cantidadIntentos)
-	scan("Presione cualquier tecla para continuar")
+	cli.tester.Send(cli.testerConfig, cantidadIntentos)
 	cli.InitCli()
 }
 

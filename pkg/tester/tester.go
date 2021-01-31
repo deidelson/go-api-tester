@@ -5,26 +5,45 @@ import (
 	"fmt"
 	"net/http"
 	"sync"
-	"time"
 )
 
-
-//TODO armar objeto para ver estadisticas
-func Post(config *TesterConfig, cantidadDeRequest int) {
-	var wg sync.WaitGroup
-	wg.Add(cantidadDeRequest)
-
-	start := time.Now()
-	for i:=0; i < cantidadDeRequest; i++ {
-		go sendPedido(config, i, &wg)
-	}
-	wg.Wait()
-	duracion := time.Since(start)
-	fmt.Printf("El proceso domoró %s", duracion)
-	fmt.Println()
+type RequestSender interface {
+	Send(config *TesterConfig, concurrency int)
 }
 
-func sendPedido(config *TesterConfig, numeroIteracion int,  wg *sync.WaitGroup) {
+type requestSender struct {
+	stadistics *testerStadistic
+}
+
+func NewRequestSender() RequestSender {
+	return &requestSender{
+		stadistics: NewTesterStadistic(),
+	}
+}
+
+func (sender *requestSender) Send(config *TesterConfig, concurrency int) {
+	var wg sync.WaitGroup
+	wg.Add(concurrency)
+
+	sender.stadistics.resetResults()
+	sender.stadistics.startCounting()
+
+	for i:=0; i < concurrency; i++ {
+		go sender.sendRequest(config, i, &wg)
+	}
+	wg.Wait()
+
+	sender.stadistics.stopCounting()
+	sender.stadistics.printStatistics()
+
+	continuar := scan("Para correr la prueba de nuevo presione 1 (cualquier otra tecla envia al inicio): ")
+	if continuar == "1" {
+		sender.Send(config, concurrency)
+	}
+
+}
+
+func (sender *requestSender) sendRequest(config *TesterConfig, numeroIteracion int,  wg *sync.WaitGroup) {
 	fmt.Println("Ejecutando request numero: ", numeroIteracion)
 	request, err := http.NewRequest(config.Method, config.Url,  bytes.NewBuffer(config.getBodyAsByteArray()))
 	if err != nil {
@@ -42,13 +61,24 @@ func sendPedido(config *TesterConfig, numeroIteracion int,  wg *sync.WaitGroup) 
 
 	if err != nil {
 		fmt.Println("Error en la request ", err.Error())
+		sender.stadistics.addResult("ERROR "+err.Error())
+		wg.Done()
 		return
 	}
+	defer response.Body.Close()
 
-	fmt.Println("Request numero", numeroIteracion , "Status", response.StatusCode)
+	fmt.Println("Request numero", numeroIteracion , "Status", response.Status)
+	sender.stadistics.addResult(response.Status)
 
 
 	wg.Done()
 
+}
+
+func scan(text string) string {
+	fmt.Print(text)
+	var input string
+	fmt.Scanln(&input)
+	return input
 }
 
