@@ -1,28 +1,28 @@
-#Golang api tester cli
+# Golang api tester cli
 
 Console CLI for api rest stress testing
 
-##Build
+## Build
 
 
-###Linux: 
+### Linux: 
 
 go build cmd/main.go  -o tester-linux
 
-###Windows 32 bits:
+### Windows 32 bits:
 
 GOOS=windows GOARCH=386 go build -o tester-32.exe cmd/main.go 
 
-###windows 64 bits:
+### windows 64 bits:
 
 GOOS=windows GOARCH=amd64 go build -o tester-64.exe cmd/main.go 
 
 
-##How to use
+## How to use
 
 There are 2 mandatory files:
 
-###tester.json: 
+### tester.json: 
 This file must contain configuration related to the endpoint:
 ```
 {
@@ -36,7 +36,7 @@ This file must contain configuration related to the endpoint:
 
 
 
-###body.json: 
+### body.json: 
 Json body for your request:
 ```
 {
