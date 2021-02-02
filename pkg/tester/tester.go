@@ -10,9 +10,9 @@ import (
 )
 
 const (
-	configPath         = "./tester.json"
-	defaultConcurrency = 10
-	defaultInterations = 10
+	configPath                       = "./tester.json"
+	defaultConcurrency               = 10
+	defaultInterations               = 10
 	defualtTimeInMSBetweenIterations = 10
 )
 
@@ -23,7 +23,7 @@ type RequestSender interface {
 
 type requestSender struct {
 	stadistics *testerStadistic
-	config *TesterConfig
+	config     *TesterConfig
 }
 
 func NewRequestSender() RequestSender {
@@ -33,19 +33,14 @@ func NewRequestSender() RequestSender {
 	}
 	return &requestSender{
 		stadistics: NewTesterStadistic(),
-		config: config,
+		config:     config,
 	}
 }
 
 func (sender *requestSender) StressTest() {
 	concurrency := util.ScanAsIntWithDefault("Seleccione la concurrencia (default 10): ", defaultConcurrency)
-	sender.stadistics.resetResults()
-	sender.stadistics.startCounting()
 
-	sender.runTestWithConcurrency(concurrency)
-
-	sender.stadistics.stopCounting()
-	sender.stadistics.printStatistics()
+	sender.runTestWithConcurrency(concurrency, 1, 0)
 
 	continuar := util.Scan("Para correr la prueba de nuevo presione 1 (cualquier otra tecla envia al inicio): ")
 	if continuar == "1" {
@@ -53,21 +48,12 @@ func (sender *requestSender) StressTest() {
 	}
 }
 
-func(sender *requestSender) IntervalStressTest() {
+func (sender *requestSender) IntervalStressTest() {
 	concurrency := util.ScanAsIntWithDefault("Seleccione la concurrencia (default 10): ", defaultConcurrency)
 	iterations := util.ScanAsIntWithDefault("Seleccione la cantidad de iteraciones (default 10): ", defaultInterations)
 	timeBetweenIterations := util.ScanAsIntWithDefault("Seleccione la cantidad de segundos entre iteraciones (default 10 segundos): ", defualtTimeInMSBetweenIterations)
 
-	sender.stadistics.resetResults()
-	sender.stadistics.startCounting()
-
-	for i:=0; i < iterations; i++ {
-		sender.runTestWithConcurrency(concurrency)
-		time.Sleep(time.Duration(timeBetweenIterations) * time.Second)
-	}
-
-	sender.stadistics.stopCounting()
-	sender.stadistics.printStatistics()
+	sender.runTestWithConcurrency(concurrency, iterations, timeBetweenIterations)
 
 	continuar := util.Scan("Para correr la prueba de nuevo presione 1 (cualquier otra tecla envia al inicio): ")
 	if continuar == "1" {
@@ -75,19 +61,27 @@ func(sender *requestSender) IntervalStressTest() {
 	}
 }
 
-func (sender *requestSender) runTestWithConcurrency(concurrency int) {
+func (sender *requestSender) runTestWithConcurrency(concurrency int, iterations int, timeBetweenIterations int) {
+	sender.stadistics.resetResults()
+	sender.stadistics.startCounting()
 	var wg sync.WaitGroup
-	wg.Add(concurrency)
+	wg.Add(concurrency*iterations)
 
-	for i:=0; i < concurrency; i++ {
-		go sender.sendRequest(sender.config, i, &wg)
+	for j := 0; j < iterations; j++ {
+		for i := 0; i < concurrency; i++ {
+			go sender.sendRequest(sender.config, i, &wg)
+		}
+		time.Sleep(time.Duration(timeBetweenIterations) * time.Second)
 	}
+
 	wg.Wait()
+	sender.stadistics.stopCounting()
+	sender.stadistics.printStatistics()
 }
 
-func (sender *requestSender) sendRequest(config *TesterConfig, numeroIteracion int,  wg *sync.WaitGroup) {
+func (sender *requestSender) sendRequest(config *TesterConfig, numeroIteracion int, wg *sync.WaitGroup) {
 	fmt.Println("Ejecutando request numero: ", numeroIteracion)
-	request, err := http.NewRequest(config.Method, config.Url,  bytes.NewBuffer(config.getBodyAsByteArray()))
+	request, err := http.NewRequest(config.Method, config.Url, bytes.NewBuffer(config.getBodyAsByteArray()))
 	if err != nil {
 		fmt.Println("Error al crear la request ", err.Error())
 		panic("Error al crear la request")
@@ -101,15 +95,14 @@ func (sender *requestSender) sendRequest(config *TesterConfig, numeroIteracion i
 
 	if err != nil {
 		fmt.Println("Error en la request ", err.Error())
-		sender.stadistics.addResult("ERROR "+err.Error())
+		sender.stadistics.addResult("ERROR " + err.Error())
 		wg.Done()
 		return
 	}
 	defer response.Body.Close()
 
-	fmt.Println("Request numero", numeroIteracion , "Status", response.Status)
+	fmt.Println("Request numero", numeroIteracion, "Status", response.Status)
 	sender.stadistics.addResult(response.Status)
 
 	wg.Done()
 }
-
