@@ -47,4 +47,10 @@ Json body for your request:
 
 Then you can run the executable file.
 
+The cli has two options:
+
+1- Stress test: N concurrent requests consuming the endpoint at the same time.
+
+2- Interval stress test: You can define number of iterations and interval between them.
+
 
