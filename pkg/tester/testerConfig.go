@@ -16,7 +16,7 @@ type TesterConfig struct {
 
 }
 
-func LoadConfig(path string) (*TesterConfig, error) {
+func CreateTesterConfigFromPath(path string) (*TesterConfig, error) {
 	config := &TesterConfig{}
 	rawConfig, err := ioutil.ReadFile(path)
 	if err != nil {
