@@ -11,7 +11,6 @@ import (
 
 type TesterCli interface {
 	InitCli()
-	Run()
 }
 
 type testerCli struct {
@@ -19,6 +18,7 @@ type testerCli struct {
 }
 
 func NewTesterCli() TesterCli {
+	//TODO Create factory and inject
 	cliInstance := &testerCli{
 		tester: tester.NewRequestSender(),
 	}
@@ -31,12 +31,12 @@ func (cli *testerCli) InitCli() {
 	fmt.Println("----------------------")
 	fmt.Println("")
 	fmt.Println("")
-	fmt.Println("1- Test de estres")
-	fmt.Println("2- Test de estres con intervalos")
-	fmt.Println("0- Salir")
+	fmt.Println("1- Simple stress test")
+	fmt.Println("2- Interval stress test")
+	fmt.Println("0- Exit")
 	fmt.Println("")
 
-	choice := util.Scan("Opcion: ")
+	choice := util.Scan("Option: ")
 
 	switch choice {
 	case "1":
@@ -52,12 +52,6 @@ func (cli *testerCli) InitCli() {
 	default:
 		cli.InitCli()
 	}
-}
-
-func (cli *testerCli) Run() {
-	util.ClearConsole()
-	cli.tester.StressTest()
-	cli.InitCli()
 }
 
 
