@@ -15,7 +15,7 @@ GOOS=windows GOARCH=386 go build -o tester-32.exe cmd/main.go
 
 ### windows 64 bits:
 
-GOOS=windows GOARCH=amd64 go build -o tester-64.exe cmd/main.go 
+git GOOS=windows GOARCH=amd64 go build -o tester-64.exe cmd/main.go 
 
 
 ## How to use
