@@ -1,13 +1,13 @@
 # Golang api tester cli
 
-Console CLI for api rest stress testing
+Console CLI for api rest stress testing v0.1.1
 
 ## Build
 
 
 ### Linux: 
 
-go build cmd/main.go  -o tester-linux
+go build -o tester-linux cmd/main.go
 
 ### Windows 32 bits:
 
@@ -27,9 +27,11 @@ This file must contain configuration related to the endpoint:
 ```
 {
   "method": "POST",
-  "url": "http://localhost:8080/myEndpoint",
-  "jwtHeader": "jwt-header-key",
-  "jwtHeaderValue": "jwtHeaderValue",
+  "url": "https://endpoint-url.com",
+  "headers": {
+    "Content-Type": "application/json",
+    "my-jwt-header": "jwt-value"
+  },
   "jsonBodyPath": "./body.json"
 }
 ```

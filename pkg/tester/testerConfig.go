@@ -9,8 +9,7 @@ type TesterConfig struct {
 
 	Method string `json:"method"`
 	Url string `json:"url"`
-	JwtHeader string `json:"jwtHeader"`
-	JwtHeaderValue string `json:"jwtHeaderValue"`
+	Headers map[string] string `json:"headers"`
 	JsonBodyPath string `json:"jsonBodyPath"`
 	byteArrayBody []byte
 
