@@ -27,7 +27,7 @@ func NewTesterCli() TesterCli {
 
 func (cli *testerCli) InitCli() {
 	util.ClearConsole()
-	fmt.Println("API Rest tester")
+	fmt.Println("API Rest tester v0.1.1")
 	fmt.Println("----------------------")
 	fmt.Println("")
 	fmt.Println("")

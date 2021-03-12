@@ -1,6 +1,6 @@
 # Golang api tester cli
 
-Console CLI for api rest stress testing
+Console CLI for api rest stress testing v0.1.1
 
 ## Build
 
