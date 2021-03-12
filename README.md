@@ -56,5 +56,5 @@ The cli has two options:
 2- Interval stress test: You can define number of iterations and interval between them.
 
 
-[Download binaries](https://github.com/deidelson/go-api-tester/releases/download/v0.0.1/tester.zip)
+[Download binaries](https://github.com/deidelson/go-api-tester/releases/download/v0.1.1/stress-tester.zip)
 
