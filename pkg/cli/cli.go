@@ -3,7 +3,7 @@ package cli
 import (
 	"fmt"
 	"github.com/deidelson/go-api-tester/pkg/tester"
-	"github.com/deidelson/go-api-tester/pkg/util"
+	"github.com/deidelson/go-api-tester/pkg/util/osutil"
 	"os"
 )
 
@@ -26,7 +26,7 @@ func NewTesterCli() TesterCli {
 }
 
 func (cli *testerCli) InitCli() {
-	util.ClearConsole()
+	osutil.ClearConsole()
 	fmt.Println("API Rest tester v0.1.1")
 	fmt.Println("----------------------")
 	fmt.Println("")
@@ -36,15 +36,15 @@ func (cli *testerCli) InitCli() {
 	fmt.Println("0- Exit")
 	fmt.Println("")
 
-	choice := util.Scan("Option: ")
+	choice := osutil.Scan("Option: ")
 
 	switch choice {
 	case "1":
-		util.ClearConsole()
+		osutil.ClearConsole()
 		cli.tester.StressTest()
 		cli.InitCli()
 	case "2":
-		util.ClearConsole()
+		osutil.ClearConsole()
 		cli.tester.IntervalStressTest()
 		cli.InitCli()
 	case "0":
