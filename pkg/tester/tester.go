@@ -35,8 +35,8 @@ func NewRequestSender() RequestSender {
 		panic("Error loading configuration, check file path and format")
 	}
 	return &requestSender{
-		stadistics: NewTesterStadistic(),
-		config:     config,
+		stadistics:  newTesterStadistic(),
+		config:      config,
 		httpService: web.NewHttpService(),
 	}
 }
@@ -70,22 +70,30 @@ func (sender *requestSender) runTestWithConcurrency(concurrency int, iterations 
 	sender.stadistics.startCounting()
 	var wg sync.WaitGroup
 	wg.Add(concurrency*iterations)
+	resultsChannel := make(chan string)
 
 	for j := 0; j < iterations; j++ {
 		log.Println("Iteration: ", j)
 		for i := 0; i < concurrency; i++ {
-			go sender.sendRequest(sender.config, j+1, i+1, &wg)
+			go sender.sendRequest(sender.config, &wg, resultsChannel)
 		}
 		time.Sleep(time.Duration(timeBetweenIterations) * time.Second)
 	}
 
-	log.Println("Waiting for response processing...")
-	wg.Wait()
+	go func() {
+		log.Println("Waiting for response processing...")
+		wg.Wait()
+		close(resultsChannel)
+	}()
+
+	for result := range resultsChannel {
+		sender.stadistics.addResult(result)
+	}
 	sender.stadistics.stopCounting()
 	sender.stadistics.printStatistics()
 }
 
-func (sender *requestSender) sendRequest(config *TesterConfig, iterationNumber, requestNumber int, wg *sync.WaitGroup) {
+func (sender *requestSender) sendRequest(config *TesterConfig, wg *sync.WaitGroup, results chan string) {
 	response, err := sender.httpService.Send(config.Method, config.Url, bytes.NewBuffer(config.getBodyAsByteArray()), config.Headers)
 	if response != nil && response.Body != nil {
 		err := response.Body.Close()
@@ -95,11 +103,13 @@ func (sender *requestSender) sendRequest(config *TesterConfig, iterationNumber, 
 	}
 
 	if err != nil {
-		sender.stadistics.addResult("ERROR " + err.Error())
+		//sender.stadistics.addResult("ERROR " + err.Error())
+		results <- "ERROR " + err.Error()
 		wg.Done()
 		return
 	}
 
-	sender.stadistics.addResult(response.Status)
+	//sender.stadistics.addResult(response.Status)
+	results <- response.Status
 	wg.Done()
 }

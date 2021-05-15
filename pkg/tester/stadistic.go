@@ -2,7 +2,6 @@ package tester
 
 import (
 	"fmt"
-	"sync"
 	"time"
 )
 
@@ -11,14 +10,12 @@ type testerStadistic struct {
 	startTime time.Time
 	testDuration time.Duration
 	results map[string]int
-	mutex *sync.Mutex
 
 }
 
-func NewTesterStadistic() *testerStadistic {
+func newTesterStadistic() *testerStadistic {
 	return &testerStadistic{
 		results: make(map[string]int),
-		mutex: &sync.Mutex{},
 	}
 }
 
@@ -35,9 +32,6 @@ func (stadistic *testerStadistic) stopCounting() {
 }
 
 func (stadistic *testerStadistic) addResult(result string) {
-	stadistic.mutex.Lock()
-	defer stadistic.mutex.Unlock()
-
 	count, present := stadistic.results[result]
 	if present {
 		stadistic.results[result] = count+1
