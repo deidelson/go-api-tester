@@ -3,7 +3,7 @@ package tester
 import (
 	"bytes"
 	"fmt"
-	"github.com/deidelson/go-api-tester/pkg/util"
+	"github.com/deidelson/go-api-tester/pkg/util/osutil"
 	"github.com/deidelson/go-api-tester/pkg/util/web"
 	"log"
 	"sync"
@@ -29,38 +29,37 @@ type requestSender struct {
 }
 
 func NewRequestSender() RequestSender {
-	//TODO create factory and inject
 	config, err := CreateTesterConfigFromPath(configPath)
 	if err != nil {
 		panic("Error loading configuration, check file path and format")
 	}
 	return &requestSender{
-		stadistics: NewTesterStadistic(),
-		config:     config,
+		stadistics:  newTesterStadistic(),
+		config:      config,
 		httpService: web.NewHttpService(),
 	}
 }
 
 func (sender *requestSender) StressTest() {
-	concurrency := util.ScanAsIntWithDefault("Concurrency (default 10): ", defaultConcurrency)
+	concurrency := osutil.ScanAsIntWithDefault("Concurrency (default 10): ", defaultConcurrency)
 
 	sender.runTestWithConcurrency(concurrency, 1, 0)
 
-	continuar := util.Scan("Press 1 to run again (other key send to main menu): ")
+	continuar := osutil.Scan("Press 1 to run again (other key send to main menu): ")
 	if continuar == "1" {
 		sender.StressTest()
 	}
 }
 
 func (sender *requestSender) IntervalStressTest() {
-	concurrency := util.ScanAsIntWithDefault("Concurrency (default 10): ", defaultConcurrency)
-	iterations := util.ScanAsIntWithDefault("Iterations (default 10): ", defaultIterations)
-	timeBetweenIterations := util.ScanAsIntWithDefault("Seconds between each iteration (default 10 segundos): ", defualtTimeInMSBetweenIterations)
+	concurrency := osutil.ScanAsIntWithDefault("Concurrency (default 10): ", defaultConcurrency)
+	iterations := osutil.ScanAsIntWithDefault("Iterations (default 10): ", defaultIterations)
+	timeBetweenIterations := osutil.ScanAsIntWithDefault("Seconds between each iteration (default 10 seconds): ", defualtTimeInMSBetweenIterations)
 
 	sender.runTestWithConcurrency(concurrency, iterations, timeBetweenIterations)
 
-	continuar := util.Scan("Press 1 to run again (other key send to main menu): ")
-	if continuar == "1" {
+	runAgain := osutil.Scan("Press 1 to run again (other key send to main menu): ")
+	if runAgain == "1" {
 		sender.IntervalStressTest()
 	}
 }
@@ -70,22 +69,31 @@ func (sender *requestSender) runTestWithConcurrency(concurrency int, iterations 
 	sender.stadistics.startCounting()
 	var wg sync.WaitGroup
 	wg.Add(concurrency*iterations)
+	resultsChannel := make(chan string)
 
 	for j := 0; j < iterations; j++ {
 		log.Println("Iteration: ", j)
 		for i := 0; i < concurrency; i++ {
-			go sender.sendRequest(sender.config, j+1, i+1, &wg)
+			go sender.sendRequest(sender.config, &wg, resultsChannel)
 		}
 		time.Sleep(time.Duration(timeBetweenIterations) * time.Second)
 	}
 
-	log.Println("Waiting for response processing...")
-	wg.Wait()
+	go func() {
+		log.Println("Waiting for response processing...")
+		wg.Wait()
+		close(resultsChannel)
+	}()
+
+	for result := range resultsChannel {
+		sender.stadistics.addResult(result)
+	}
 	sender.stadistics.stopCounting()
 	sender.stadistics.printStatistics()
 }
 
-func (sender *requestSender) sendRequest(config *TesterConfig, iterationNumber, requestNumber int, wg *sync.WaitGroup) {
+func (sender *requestSender) sendRequest(config *TesterConfig, wg *sync.WaitGroup, results chan string) {
+	defer wg.Done()
 	response, err := sender.httpService.Send(config.Method, config.Url, bytes.NewBuffer(config.getBodyAsByteArray()), config.Headers)
 	if response != nil && response.Body != nil {
 		err := response.Body.Close()
@@ -95,11 +103,9 @@ func (sender *requestSender) sendRequest(config *TesterConfig, iterationNumber, 
 	}
 
 	if err != nil {
-		sender.stadistics.addResult("ERROR " + err.Error())
-		wg.Done()
+		results <- "ERROR " + err.Error()
 		return
 	}
 
-	sender.stadistics.addResult(response.Status)
-	wg.Done()
+	results <- response.Status
 }
